@@ -13,8 +13,16 @@ import {
   Box,
   useMediaQuery,
   useTheme,
-  Button,
+  Button,TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormControlLabel,
+  Switch,
+  Stack,
 } from "@mui/material";
+
 
 interface ElectricityDayData {
   paiva: string;
@@ -31,36 +39,92 @@ export default function ResponsiivinenSahkoMUI(): React.JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [sivu, setSivu] = useState<number>(1);
   const riviRajoitus: number = 30;
+  const [alkupvm, setAlkupvm] = useState<string>("");
+  const [loppupvm, setLoppupvm] = useState<string>("");
+  const [vainMiinukset, setVainMiinukset] = useState<boolean>(false);
+  const [jarjestys, setJarjestys] = useState<string>("uusin");
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    async function fetchData(): Promise<void> {
+    async function fetchData() {
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:3001/api/electricity?page=${sivu}&limit=${riviRajoitus}`,
-        );
-        if (!response.ok) throw new Error(`Virhe: ${response.status}`);
+        const url = `http://localhost:3001/api/electricity?page=${sivu}&limit=${riviRajoitus}&alkupvm=${alkupvm}&loppupvm=${loppupvm}&vainMiinukset=${vainMiinukset}&jarjestys=${jarjestys}`;
+        const response = await fetch(url);
         const json = await response.json();
         setData(json);
       } catch (error) {
-        console.error("Datan haku epäonnistui:", error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
     }
     fetchData();
-  }, [sivu]);
+  }, [sivu, alkupvm, loppupvm, vainMiinukset, jarjestys]);
 
   if (loading && data.length === 0) return <p>Ladataan tietoja...</p>;
+
+  const nollaaJaAseta = (FiltteriFunktio: (val: any) => void, arvo: any) => {
+    setSivu(1);
+    FiltteriFunktio(arvo);
+  };
 
   return (
     <Box sx={{ padding: "20px", fontFamily: "sans-serif" }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
         Sähködata Päivätasolla
       </Typography>
+
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 4, alignItems: "center" }}
+      >
+        <TextField
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+          label="Alkaen"
+          type="date"
+          value={alkupvm}
+          onChange={(e) => nollaaJaAseta(setAlkupvm, e.target.value)}
+        />
+        <TextField
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
+          label="Päättyen"
+          type="date"
+          value={loppupvm}
+          onChange={(e) => nollaaJaAseta(setLoppupvm, e.target.value)}
+        />
+        <FormControl sx={{ minWidth: 150 }}>
+          <InputLabel>Järjestys</InputLabel>
+          <Select
+            value={jarjestys}
+            label="Järjestys"
+            onChange={(e) => nollaaJaAseta(setJarjestys, e.target.value)}
+          >
+            <MenuItem value="uusin">Uusin päivä ensin</MenuItem>
+            <MenuItem value="hinta_nouseva">Halvin keskihinta ensin</MenuItem>
+            <MenuItem value="hinta_laskeva">Kallein keskihinta ensin</MenuItem>
+            <MenuItem value="kulutus_suurin">Suurin kulutus ensin</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={vainMiinukset}
+              onChange={(e) =>
+                nollaaJaAseta(setVainMiinukset, e.target.checked)
+              }
+            />
+          }
+          label="Vain miinustunnit"
+        />
+      </Stack>
 
       {isMobile ? (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 
-const frontendDistPath = path.join(import.meta.dirname, '../../frontend/electricity_info/dist');
+const frontendDistPath = path.join(import.meta.dirname, '../../Frontend/electricity_info/dist');
 
 import electricityInfoRouter from "./routes/electricityInfoRouter.ts";
 const app = express();

@@ -1,0 +1,23 @@
+{
+  "name": "dev-academy-autumn-2026-exercise",
+  "version": "1.0.0",
+  "description": "This is the pre-assignment for Solita Dev Academy Finland Autumn 2026. But if you’re here just purely out of curiosity, feel free to snatch the idea and make your own app just for the fun of it!",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PetteriLeivo/dev-academy-autumn-2026-exercise.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PetteriLeivo/dev-academy-autumn-2026-exercise/issues"
+  },
+  "homepage": "https://github.com/PetteriLeivo/dev-academy-autumn-2026-exercise#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.5.0"
+  }
+}

@@ -5,14 +5,13 @@ import pg from 'pg';
 const { Pool } = pg;
 
 const router = Router();
-const isProduction = process.env.NODE_ENV === "production";
 
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'academy',       
-  password: 'academy', 
-  database: 'electricity'
+export const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost', 
+  port: Number(process.env.DB_PORT) || 5432,
+  user: process.env.DB_USER || 'academy',
+  password: process.env.DB_PASS || 'academy',
+  database: process.env.DB_NAME || 'electricity'
 });
 
 router.get("/electricity", async (req: Request, res: Response) => {
@@ -43,16 +42,17 @@ router.get("/electricity", async (req: Request, res: Response) => {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
+    // Direct mapping to outer columns
     const sallitutSarakkeet: Record<string, string> = {
-      paiva: 't.paiva',
-      kokonaiskulutus: 't.kokonaiskulutus',
-      kokonaistuotanto: 't.kokonaistuotanto',
-      keskihinta: 't.keskihinta',
-      pisin_miinusjakso: 'COALESCE(m.pisin_miinusjakso, 0)'
+      paiva: '"paiva"',
+      kokonaiskulutus: '"kokonaiskulutus"',
+      kokonaistuotanto: '"kokonaistuotanto"',
+      keskihinta: '"keskihinta"',
+      pisin_miinusjakso: '"pisin_miinusjakso"'
     };
 
-    const jarjestysSarake = sallitutSarakkeet[sortBy] || 't.paiva';
-    const orderBy = `ORDER BY ${jarjestysSarake} ${sortOrder}`;
+    const jarjestysSarake = sallitutSarakkeet[sortBy] || '"paiva"';
+    const orderByClause = `ORDER BY ${jarjestysSarake} ${sortOrder} NULLS LAST`;
 
     let limitClause = "";
     if (!haeKaikki) {
@@ -64,31 +64,55 @@ router.get("/electricity", async (req: Request, res: Response) => {
     }
 
     const query = `
-      WITH hintajaksot AS (
+      WITH raakadata AS (
           SELECT 
-              starttime::date AS paiva, starttime, hourlyprice, consumptionamount, productionamount,
-              CASE WHEN hourlyprice < 0 THEN 1 ELSE 0 END AS on_negatiivinen,
-              ROW_NUMBER() OVER (PARTITION BY starttime::date ORDER BY starttime) AS jono,
-              ROW_NUMBER() OVER (PARTITION BY starttime::date, CASE WHEN hourlyprice < 0 THEN 1 ELSE 0 END ORDER BY starttime) AS ryhma_jono,
-              ROW_NUMBER() OVER (PARTITION BY starttime::date ORDER BY (COALESCE(consumptionamount, 0) - productionamount) DESC, starttime ASC) AS rank_kulutus,
-              RANK() OVER (PARTITION BY starttime::date ORDER BY hourlyprice ASC) AS rank_hinta
+              starttime::date AS paiva,
+              starttime,
+              hourlyprice,
+              COALESCE(consumptionamount, 0) AS consumptionamount,
+              COALESCE(productionamount, 0) AS productionamount
           FROM electricitydata
           ${whereClause}
       ),
       perus_tilastot AS (
-          SELECT paiva, COALESCE(SUM(consumptionamount), 0) AS kokonaiskulutus, COALESCE(SUM(productionamount), 0) AS kokonaistuotanto, COALESCE(AVG(hourlyprice), 0) AS keskihinta
-          FROM hintajaksot GROUP BY paiva
+          SELECT 
+              paiva, 
+              SUM(consumptionamount) AS kokonaiskulutus, 
+              SUM(productionamount) AS kokonaistuotanto, 
+              AVG(hourlyprice) AS keskihinta
+          FROM raakadata 
+          GROUP BY paiva
+      ),
+      hintajaksot AS (
+          SELECT 
+              paiva, starttime, hourlyprice, consumptionamount, productionamount,
+              CASE WHEN hourlyprice < 0 THEN 1 ELSE 0 END AS on_negatiivinen,
+              ROW_NUMBER() OVER (PARTITION BY paiva ORDER BY starttime) AS jono,
+              ROW_NUMBER() OVER (PARTITION BY paiva, CASE WHEN hourlyprice < 0 THEN 1 ELSE 0 END ORDER BY starttime) AS ryhma_jono,
+              ROW_NUMBER() OVER (PARTITION BY paiva ORDER BY (consumptionamount - productionamount) DESC, starttime ASC) AS rank_kulutus,
+              RANK() OVER (PARTITION BY paiva ORDER BY hourlyprice ASC) AS rank_hinta
+          FROM raakadata
       ),
       pisimmat_negatiiviset AS (
           SELECT paiva, MAX(tunnit_putkeen) AS pisin_miinusjakso
           FROM (
-              SELECT paiva, COUNT(*) AS tunnit_putkeen FROM hintajaksot WHERE on_negatiivinen = 1 GROUP BY paiva, (jono - ryhma_jono)
-          ) sub GROUP BY paiva
+              SELECT paiva, COUNT(*) AS tunnit_putkeen 
+              FROM hintajaksot 
+              WHERE on_negatiivinen = 1 
+              GROUP BY paiva, (jono - ryhma_jono)
+          ) sub 
+          GROUP BY paiva
       ),
-      kulutushuiput AS ( SELECT paiva, EXTRACT(HOUR FROM starttime) AS suurin_kulutustunti FROM hintajaksot WHERE rank_kulutus = 1 ),
+      kulutushuiput AS ( 
+          SELECT paiva, EXTRACT(HOUR FROM starttime) AS suurin_kulutustunti 
+          FROM hintajaksot 
+          WHERE rank_kulutus = 1 
+      ),
       halvimmat_tunnit AS (
           SELECT paiva, ARRAY_AGG(EXTRACT(HOUR FROM starttime) ORDER BY starttime) AS halvimmat_tunnit
-          FROM hintajaksot WHERE rank_hinta = 1 GROUP BY paiva
+          FROM hintajaksot 
+          WHERE rank_hinta = 1 
+          GROUP BY paiva
       )
       SELECT 
           t.paiva::text AS "paiva",
@@ -104,7 +128,7 @@ router.get("/electricity", async (req: Request, res: Response) => {
       LEFT JOIN kulutushuiput kh ON t.paiva = kh.paiva
       LEFT JOIN halvimmat_tunnit ht ON t.paiva = ht.paiva
       ${vainMiinukset === 'true' ? 'WHERE COALESCE(m.pisin_miinusjakso, 0) > 0' : ''}
-      ${orderBy}
+      ${orderByClause}
       ${limitClause};
     `;
 

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import 'dotenv/config'
 
 const frontendDistPath = path.join(import.meta.dirname, '../../Frontend/electricity_info/dist');
 

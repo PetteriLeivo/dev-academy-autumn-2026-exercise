@@ -21,6 +21,7 @@ import {
   Chip,
 } from "@mui/material";
 import ElectricityGraph from "./ElectricityGraph";
+import PaginationControls from "./PaginationControls";
 
 interface ElectricityDayData {
   paiva: string;
@@ -375,30 +376,11 @@ export default function ResponsiivinenSahkoMUI(): React.JSX.Element {
           </Table>
         </TableContainer>
       )}
-
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{ mt: 3, justifyContent: "center" }}
-      >
-        <Button
-          disabled={sivu === 1}
-          onClick={() => setSivu((p) => Math.max(p - 1, 1))}
-          variant="outlined"
-        >
-          Edellinen
-        </Button>
-        <Typography sx={{ alignSelf: "center", fontWeight: "bold" }}>
-          Sivu {sivu} / {yhteensaSivuja}
-        </Typography>
-        <Button
-          disabled={sivu >= yhteensaSivuja}
-          onClick={() => setSivu((p) => p + 1)}
-          variant="outlined"
-        >
-          Seuraava
-        </Button>
-      </Stack>
+      <PaginationControls
+        sivu={sivu}
+        yhteensaSivuja={yhteensaSivuja}
+        onPageChange={(newPage) => setSivu(newPage)}
+      />
     </Box>
   );
 }

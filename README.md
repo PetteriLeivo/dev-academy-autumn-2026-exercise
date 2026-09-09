@@ -66,16 +66,20 @@ If you prefer to run the backend and frontend natively for development or testin
 
 2. **Start the Backend:**
    Open a terminal, navigate to the backend, install dependencies, and start it:
+   ```bash
    cd backend
    npm install
    npm run dev
+   ```
    *(The backend server will run on `http://localhost:3001` and connect to the Docker PostgreSQL instance).*
 
 3. **Start the Frontend:**
    Open a second terminal, navigate to the frontend, install dependencies, and start Vite:
+   ```bash
    cd frontend/electricity_info
    npm install
    npm run dev
+   ```
    *(The Vite dev server will typically run on `http://localhost:5173`)*
 
 
@@ -115,10 +119,13 @@ The test suite validates the application's core functionality through these comp
 7. **Graceful Error & Empty States:** Checks that out-of-range inputs or empty results are handled cleanly without crashing the UI.
 8. **Column Sorting:** Verifies that clicking column headers interactively reorders the tabular dataset.
 
-### Running the Test Suite
-
-Make sure your local development server is running, then execute the tests using the following commands:
+### Running the Test Suite on Project Root
 ```bash
+# Install the missing root dependencies (including @playwright/test)
+npm install
+
+# Install the browser binaries if they aren't there yet
+npx playwright install
 # Run all E2E tests headlessly across browsers
 npx playwright test
 

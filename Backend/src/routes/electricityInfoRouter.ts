@@ -7,11 +7,11 @@ const { Pool } = pg;
 const router = Router();
 
 export const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost', 
-  port: Number(process.env.DB_PORT) || 5432,
-  user: process.env.DB_USER || 'academy',
-  password: process.env.DB_PASS || 'academy',
-  database: process.env.DB_NAME || 'electricity'
+  host: 'host.docker.internal', 
+  port: 5432,
+  user: 'academy',
+  password: 'academy',
+  database: 'electricity'
 });
 
 router.get("/electricity", async (req: Request, res: Response) => {

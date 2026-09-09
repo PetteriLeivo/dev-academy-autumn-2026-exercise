@@ -6,10 +6,10 @@ const { Pool } = pg;
 
 export const pool = new Pool({
   host: process.env.DB_HOST || 'host.docker.internal',
-  port: 5432,
-  user: 'academy',
-  password: 'academy',
-  database: 'electricity'
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  user: process.env.DB_USER || 'academy',
+  password: process.env.DB_PASSWORD || 'academy',
+  database: process.env.DB_DATABASE || 'electricity'
 });
 
 const router = Router();

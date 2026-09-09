@@ -34,7 +34,7 @@ A professional, responsive dashboard for tracking electricity data, built with R
 
 ### Prerequisites
 
-- Docker and Docker Compose installed on your machine.
+- Docker Desktop installed and running
 
 ### 1. Clone the Repository
 
@@ -49,8 +49,9 @@ cd dev-academy-autumn-2026-exercise
 To run the entire stack (Database, Adminer, and Backend serving the compiled Frontend) seamlessly:
 
 1. Build and start the containers in detached mode:
-   
+   ```bash
    docker compose up -d --build
+   ```
 
 2. Open your browser and navigate to:
    - **Dashboard App:** http://localhost:3001
@@ -61,7 +62,9 @@ To run the entire stack (Database, Adminer, and Backend serving the compiled Fro
 If you prefer to run the backend and frontend natively for development or testing while keeping the database containerized:
 
 1. **Start the Database:**
+   ```bash
    docker compose up -d db adminer
+      ```
    *(This starts PostgreSQL and Adminer in the background).*
 
 2. **Start the Backend:**

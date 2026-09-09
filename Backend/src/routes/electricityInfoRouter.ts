@@ -4,15 +4,16 @@ import type { Request, Response } from 'express';
 import pg from 'pg';
 const { Pool } = pg;
 
-const router = Router();
-
 export const pool = new Pool({
-  host: 'host.docker.internal', 
+  host: process.env.DB_HOST || 'host.docker.internal',
   port: 5432,
   user: 'academy',
   password: 'academy',
   database: 'electricity'
 });
+
+const router = Router();
+
 
 router.get("/electricity", async (req: Request, res: Response) => {
   try {

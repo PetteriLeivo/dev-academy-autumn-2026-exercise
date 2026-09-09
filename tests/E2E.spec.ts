@@ -125,9 +125,7 @@ test('8. Should sort table data when clicking a column header', async ({ page })
   // Click the header cell to trigger sorting
   await hintaHeader.click();
 
-  // Use poll to wait for the DOM to update and reorder the rows
-  await expect.poll(async () => {
-    return await table.locator('tbody tr').first().textContent();
-  }).not.toBe(firstRowBefore);
+  // Use Playwright's built-in auto-retrying locator assertion
+  await expect(table.locator('tbody tr').first()).not.toHaveText(firstRowBefore ?? '');
 });
 })

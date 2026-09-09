@@ -39,10 +39,12 @@ A professional, responsive dashboard for tracking electricity data, built with R
 ### 1. Clone the Repository
 
 Clone the repository and navigate into the project root:
-
+   ```bash
 git clone https://github.com/PetteriLeivo/dev-academy-autumn-2026-exercise.git
 
 cd dev-academy-autumn-2026-exercise
+   ```
+
 
 ### 2. Running with Docker Compose (Recommended)
 

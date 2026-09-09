@@ -83,6 +83,7 @@ If you prefer to run the backend and frontend natively for development or testin
    ```bash
    cd frontend/electricity_info
    npm install
+   npm run build
    npm run dev
    ```
    *(The Vite dev server will typically run on `http://localhost:5173`)*

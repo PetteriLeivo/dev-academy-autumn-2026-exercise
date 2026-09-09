@@ -1,82 +1,129 @@
-# dev-academy-autumn-2026-exercise
+<pre>
+├── backend/
+│   ├── src/
+│   │   ├── routes/         # API route handlers
+│   │   └── server.ts        # Main Express server entry point
+│   ├── package.json
+│   └── Dockerfile
+├── frontend/
+│   └── electricity_info/
+│       └── dist/            # Compiled frontend production assets
+└── docker-compose.yml       # Multi-container orchestration
+</pre>
 
-This is the pre-assignment for Solita Dev Academy Finland Autumn 2026. But if you’re here just purely out of curiosity, feel free to snatch the idea and make your own app just for the fun of it!
+# Electricity Dashboard
 
-Let's imagine that you have received an interesting project offer to create a UI and a backend service for displaying data from electricity production, consumption and prices. 
-The exercise uses data that is owned by Fingrid and combines that with electricity price data from porssisahko.net. 
+A professional, responsive dashboard for tracking electricity data, built with React, TypeScript, Material-UI, Node.js, Express, and PostgreSQL.
 
-# The exercise
-Create a web application that uses a backend service to fetch the data. Backend can be made with any technology. We at Solita use for example (not in preference order) Java/Kotlin/C#/TypeScript but you are free to choose any other technology as well. 
+## Features
 
-You are provided with Docker setup, with contains a PostgreSQL database with all the necessary data for the exercise. 
+- **Responsive Layouts:** Tailored desktop table view and mobile-optimized card interface.
+- **Finnish Localization:** Standardized Finnish date formatting (`fmtPvm`) integrated across all views.
+- **Data Controls:** Fully functional sorting, filtering, and pagination.
+- **Data Visualization:** Interactive graphs powered by Recharts.
+- **Robust Testing:** Automated E2E test coverage with Playwright.
 
-You can also freely choose the frontend technologies to use. The important part is to give good instructions on how to build and run the project.
+## Tech Stack
 
-Please return the exercise as a link to github repository. 
+- **Frontend:** React, Vite, Material-UI, Recharts
+- **Backend:** Node.js, Express
+- **Database:** PostgreSQL managed via Docker
+- **Tools:** Adminer (database management UI), Playwright (E2E testing)
 
-## Use of Generative AI Tools
+## Getting Started Locally
 
-We welcome the use of generative AI tools as part of modern software development and recognize that they can be valuable in supporting ideation, learning, and implementation.
+### Prerequisites
 
-In this assignment, we are interested in understanding the candidate’s own problem-solving approach, coding skills, and way of thinking. You are encouraged to use generative AI tools during the assignment, but you should explain in the README where and how you used them.
+- Docker and Docker Compose installed on your machine.
 
-The submitted solution should reflect your own understanding and decisions, and you should be able to discuss and justify the work you present.
+### 1. Clone the Repository
 
-# Stuff to do 
+Clone the repository and navigate into the project root:
 
-## Daily statistics list (recommended features)
-- Total electricity consumption per day 
-- Total electricity production per day 
-- Average electricity price per day 
-- Longest consecutive time in hours, when electricity price has been negative, per day 
+git clone https://github.com/PetteriLeivo/dev-academy-autumn-2026-exercise.git
 
-## Additional features for daily statistics list
-- Pagination 
-- Ordering per column 
-- Searching 
-- Filtering 
+cd dev-academy-autumn-2026-exercise
 
-## Other additional features
-- Single day view 
--- Total electricity consumption per day 
--- Total electricity production per day 
--- Average electricity price per day 
--- Hour with most electricity consumption compared to production 
--- Cheapest electricity hours for the day 
-- Graph visualisations 
+### 2. Running with Docker Compose (Recommended)
 
-## Surprise us with 
-- Running backend in Docker 
-- Running backend in Cloud 
-- Implement E2E tests 
+To run the entire stack (Database, Adminer, and Backend serving the compiled Frontend) seamlessly:
 
-# Instructions for running the database
-1. Install Docker Desktop on your computer (https://docs.docker.com/desktop/)
-2. Clone this repository
-3. On command line under this folder run:
+1. Build and start the containers in detached mode:
+   
+   docker compose up -d --build
 
-```
-docker compose up --build --renew-anon-volumes -d
-```
+2. Open your browser and navigate to:
+   - **Dashboard App:** http://localhost:3001
+   - **Adminer UI:** http://localhost:8088
 
-Please note that running that might take couple of minutes
+### 3. Running Locally (Without Docker for App Services)
 
-4. Docker setup also comes with Adminer UI, where you can check your database contents at http://localhost:8088/
-5. Log into Adminer with following information (password: academy):
+If you prefer to run the backend and frontend natively for development or testing while keeping the database containerized:
 
-![alt text](login.png)
+1. **Start the Database:**
+   docker compose up -d db adminer
+   *(This starts PostgreSQL and Adminer in the background).*
 
-Database is running at postgres://localhost:5432/electricity and the database name is electricity. Database comes with user academy (password: academy).
+2. **Start the Backend:**
+   Open a terminal, navigate to the backend, install dependencies, and start it:
+   cd backend
+   npm install
+   npm run dev
+   *(The backend server will run on `http://localhost:3001` and connect to the Docker PostgreSQL instance).*
 
-# Database structure
-Database consists of one table electricityData.
+3. **Start the Frontend:**
+   Open a second terminal, navigate to the frontend, install dependencies, and start Vite:
+   cd frontend/electricity_info
+   npm install
+   npm run dev
+   *(The Vite dev server will typically run on `http://localhost:5173`)*
 
-## ElectricityData table
-| Column | Description | Type |
-| ----------- | ----------- | ----------- |
-| id | id, primary key | integer |
-| date | date of the data point | DATE |
-| startTime | Starting time of the hour for the data point | TIMESTAMP |
-| productionAmount | Electricity production for the hour MWh/h | NUMERIC(11,5) *NULL* |
-| consumptionAmount | Electricity consumption for the hour kWh | NUMERIC(11,3) *NULL* |
-| hourlyPrice | Electricity price for the hour | NUMERIC(6,3) *NULL* |
+
+## Project Structure
+
+- `backend/` - Express server, database connection, and frontend build serving, managed by its own Dockerfile.
+- `frontend/` - React application source code.
+- `docker-compose.yml` - Root orchestration file managing the PostgreSQL database, Adminer, and the backend container.
+
+## Future Improvements
+
+- Optional hourly drill-down view deferred to prioritize core system stability and strict delivery timeline.
+
+## AI Usage Statement
+
+An AI assistant (Google Gemini) was utilized during the development of this project as a technical collaborator and debugging partner. Specifically, AI was used for:
+- **Troubleshooting & Debugging:** Resolving Node.js ES module scope issues (`import.meta.dirname`) and Express v5 path-to-regexp wildcard routing errors.
+- **Configuration Assistance:** Structuring the production Dockerfile, multi-container Docker Compose setup, and organizing project documentation.
+- **Code Refactoring:** Adapting the static file serving middleware and catch-all routing fallback.
+
+All architectural decisions, code implementation, integration, and testing were actively reviewed, managed, and verified by the author.
+
+## Test Automation & E2E Testing
+
+This application features a robust End-to-End (E2E) testing suite built with **Playwright (TypeScript)**, covering core domain requirements, asynchronous data loading, localized UI elements, and interactive edge cases across Chromium, Firefox, and WebKit.
+
+### Test Coverage Summary
+
+The test suite validates the application's core functionality through these comprehensive scenarios:
+
+1. **App Loading & Initialization:** Verifies the app successfully mounts and handles asynchronous data fetching states (`Ladataan...`).
+2. **Data Rendering & Localization:** Validates correct rendering of Finnish-localized table headers (`Kulutus`, `Tuotanto`, `Hinta`).
+3. **Negative Pricing Indicators:** Ensures hours or days with negative electricity prices are correctly handled and displayed.
+4. **Pagination:** Confirms navigation controls work properly across multi-page datasets (`Sivu X / Y`).
+5. **View Toggling:** Tests switching between tabular summaries and graphical or chart views.
+6. **Filtering Logic:** Validates data filtering mechanisms such as isolating negative price hours.
+7. **Graceful Error & Empty States:** Checks that out-of-range inputs or empty results are handled cleanly without crashing the UI.
+8. **Column Sorting:** Verifies that clicking column headers interactively reorders the tabular dataset.
+
+### Running the Test Suite
+
+Make sure your local development server is running, then execute the tests using the following commands:
+```bash
+# Run all E2E tests headlessly across browsers
+npx playwright test
+
+# Run tests with the interactive Playwright UI runner
+npx playwright test --ui
+
+# View the detailed HTML test report
+npx playwright show-report
